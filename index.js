@@ -2,25 +2,25 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-
-
-mongoose.connect(process.env.MONGO_URI, { dbName: "n8n" })
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, { dbName: "n8n" })
   .then(() => console.log("✅ Connected to n8n DB"))
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
-
+// Schemas
 const foodSchema = new mongoose.Schema({
   name: String,
   price: Number,
   flavor: String,
-  imagelink: String
+  imagelink: String,
 });
 
 const Food = mongoose.model("food", foodSchema, "food");
@@ -30,10 +30,15 @@ const orderSchema = new mongoose.Schema({
   foodName: String,
   flavor: String,
   price: Number,
-  orderedAt: { type: Date, default: Date.now }
+  orderedAt: { type: Date, default: Date.now },
 });
 
 const Order = mongoose.model("order", orderSchema, "orders");
+
+// Routes
+app.get("/", (req, res) => {
+  res.send("Backend Working 🚀");
+});
 
 app.get("/food", async (req, res) => {
   const data = await Food.find();
@@ -47,5 +52,5 @@ app.post("/order", async (req, res) => {
   res.json({ message: "Order placed successfully!" });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+// ❗IMPORTANT: No app.listen() on Vercel
+export default app;
